@@ -1,5 +1,5 @@
 import io
-from surprise import KNNBaseline
+from surprise import KNNWithMeans
 from surprise import Dataset
 from surprise import get_dataset_dir
 from collections import defaultdict
@@ -25,16 +25,19 @@ def get_top_n(predictions, n=5):
     return top_n
 
 user_id = input('User id: ')
+
 data = Dataset.load_builtin('ml-100k')
 trainset = data.build_full_trainset()
 sim_options = {'name': 'cosine', 'user_based': True, 'min_support': 5}
-algo = KNNBaseline(k=4, sim_options=sim_options)
+algo = KNNWithMeans(k=4, sim_options=sim_options)
 algo.fit(trainset)
 testset = trainset.build_anti_testset()
 testset = filter(lambda x: x[0] == user_id, testset)
 predictions = algo.test(testset)
+
 top_n = get_top_n(predictions)
 rid_to_name = read_names()
 print('User ' + user_id)
+
 for movie_rid, rating in top_n[user_id]:
     print('{:4s} {:<60s} {}'.format(movie_rid, str(rid_to_name[movie_rid]), rating))
